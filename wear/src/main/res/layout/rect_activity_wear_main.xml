@@ -1,15 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".WearMainActivity"
-    tools:deviceIds="wear_square">
+    tools:deviceIds="wear_square"
+    android:weightSum="1">
 
     <TextView
         android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/hello_square" />
-</LinearLayout>
+        android:text="@string/tempo_string"
+        android:textAlignment="center"
+        android:layout_marginLeft="65dp"
+        android:layout_marginTop="5dp" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="-"
+        android:id="@+id/temp_decrease_button"
+        android:textSize="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/text"
+        android:layout_alignParentLeft="true"
+        android:onClick="handleClick" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+"
+        android:id="@+id/tempo_increase_button"
+        android:textSize="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_below="@id/text"
+        android:layout_alignParentRight="true"
+        android:onClick="handleClick" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="60"
+        android:id="@+id/cur_tempo_text"
+        android:textSize="24dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_below="@+id/text"
+        android:layout_alignStart="@+id/text" />
+</RelativeLayout>
