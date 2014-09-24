@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
 import android.support.wearable.view.WatchViewStub;
+import android.util.Log;
 import android.widget.TextView;
 import android.view.View;
 import android.widget.Button;
@@ -12,6 +13,7 @@ import android.widget.Button;
 
 public class WearMainActivity extends Activity {
 
+    private static final String TAG = "NomeWearMainActivity";
     private TextView mTextView;
 
     private static int MILLISECONDS_PER_MIN = 60 * 1000;
@@ -36,9 +38,7 @@ public class WearMainActivity extends Activity {
 
     private Handler mPeriodicHandler;
 
-    private void updateParams() {
-        return;
-    }
+    private Object mParamLock = new Object();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +61,7 @@ public class WearMainActivity extends Activity {
     }
 
     public void handleTempoClick(View v) {
-        synchronized (this) {
+        synchronized (mParamLock) {
             switch (v.getId()) {
                 case R.id.temp_decrease_button:
                     mCurrentTempo--;
@@ -82,30 +82,45 @@ public class WearMainActivity extends Activity {
     Runnable mBeatsTask = new Runnable() {
         @Override
         public void run() {
-            // TODO: Need to worry about synchronization of the member variables here
-            mCurrentNote = (mCurrentNote + 1) % mNotesPerMeasure;
-            if (mCurrentNote == 0) {
-                //End of Bar, so vibrate longer
-                mVibrator.vibrate(VIBRATE_LENGTH_COMPLETE);
-            } else {
+            synchronized (mParamLock) {
+                mCurrentNote = (mCurrentNote + 1) % mNotesPerMeasure;
+                if (mCurrentNote == 0) {
+                    //End of Bar, so vibrate longer
+                    mVibrator.vibrate(VIBRATE_LENGTH_COMPLETE);
+                } else {
+                    mVibrator.vibrate(VIBRATE_LENGTH_NORMAL);
+                }
                 mVibrator.vibrate(VIBRATE_LENGTH_NORMAL);
+                mPeriodicHandler.postDelayed(this, mTimeInterval);
             }
-            mVibrator.vibrate(VIBRATE_LENGTH_NORMAL);
-            mPeriodicHandler.postDelayed(this, mTimeInterval);
         }
     };
 
     public void startStopClick(View v) {
         Button startButton = (Button)findViewById(R.id.startButton);
+        synchronized (mParamLock) {
+            if (mCurrentlyRunning == false) {
+                mCurrentlyRunning = true;
+                mBeatsTask.run();
+                startButton.setText("Stop");
+            } else {
+                startButton.setText("Start");
+                mPeriodicHandler.removeCallbacks(mBeatsTask);
+                mCurrentlyRunning = false;
+            }
+        }
+    }
 
-        if (mCurrentlyRunning == false) {
-            mCurrentlyRunning = true;
-            mBeatsTask.run();
-            startButton.setText("Stop");
-        } else {
-            startButton.setText("Start");
-            mPeriodicHandler.removeCallbacks(mBeatsTask);
-            mCurrentlyRunning = false;
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e(TAG, "onPause()");
+        synchronized (mParamLock) {
+            // Stop any pending timers
+            if (mCurrentlyRunning == true) {
+                mPeriodicHandler.removeCallbacks(mBeatsTask);
+                mCurrentlyRunning = false;
+            }
         }
     }
 }
