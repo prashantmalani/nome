@@ -6,6 +6,10 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +19,7 @@ public class WearMainActivity extends Activity {
 
     private static final String TAG = "NomeWearMainActivity";
     private TextView mTextView;
+    private RelativeLayout mRelLayout;
 
     private static int MILLISECONDS_PER_MIN = 60 * 1000;
 
@@ -40,6 +45,11 @@ public class WearMainActivity extends Activity {
 
     private Object mParamLock = new Object();
 
+    private Animation mFlashAnimation;
+
+    // Length of the flash, in milliseconds
+    private static int FLASH_LENGTH = 10;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +68,18 @@ public class WearMainActivity extends Activity {
                 mTextView = (TextView) stub.findViewById(R.id.text);
             }
         });
+        // Perform Animation setup
+        mFlashAnimation = new AlphaAnimation(0, 1);
+        mFlashAnimation.setDuration(FLASH_LENGTH * 5);
+        mFlashAnimation.setInterpolator(new AccelerateInterpolator());
+        mFlashAnimation.setRepeatMode(Animation.REVERSE);
+
+        setContentView(R.layout.rect_activity_wear_main);
+        mRelLayout = (RelativeLayout)findViewById(R.id.relLayout);
+        if (mRelLayout == null) {
+            Log.e(TAG, "mRelLayout returned NULL!");
+        }
+
     }
 
     public void handleTempoClick(View v) {
@@ -86,7 +108,8 @@ public class WearMainActivity extends Activity {
                 mCurrentNote = (mCurrentNote + 1) % mNotesPerMeasure;
                 if (mCurrentNote == 0) {
                     //End of Bar, so vibrate longer
-                    mVibrator.vibrate(VIBRATE_LENGTH_COMPLETE);
+                    mVibrator.vibrate(VIBRATE_LENGTH_NORMAL);
+                    //mRelLayout.startAnimation(mFlashAnimation);
                 } else {
                     mVibrator.vibrate(VIBRATE_LENGTH_NORMAL);
                 }

@@ -6,7 +6,8 @@
     android:orientation="vertical"
     tools:context=".WearMainActivity"
     tools:deviceIds="wear_square"
-    android:weightSum="1">
+    android:weightSum="1"
+    android:id="@+id/relLayout">
 
     <TextView
         android:id="@+id/text"
