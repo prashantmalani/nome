@@ -88,7 +88,9 @@
             android:layout_weight="0.39"
             android:gravity="center"
             android:textSize="28dp"
-            android:includeFontPadding="false"/>
+            android:includeFontPadding="false"
+            android:onClick="timeSigNumClick"
+            android:clickable="true" />
         <View
             android:layout_width="fill_parent"
             android:layout_height="3dp"
@@ -103,6 +105,7 @@
             android:layout_weight="0.39"
             android:textSize="28dp"
             android:gravity="center"
-            android:layout_marginTop="3dp"/>
+            android:layout_marginTop="3dp"
+            android:clickable="true" />
     </LinearLayout>
 </RelativeLayout>

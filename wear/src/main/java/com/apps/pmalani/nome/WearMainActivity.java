@@ -22,11 +22,19 @@ public class WearMainActivity extends Activity {
     private TextView mTextView;
     private RelativeLayout mRelLayout;
     private Button mStartButton;
+    private TextView mTimeSigNumView;
+    private TextView mTimeSigDenView;
 
     private static int MILLISECONDS_PER_MIN = 60 * 1000;
 
     private static int VIBRATE_LENGTH_NORMAL = 50;
-    private static int VIBRATE_LENGTH_COMPLETE = 100;
+    private static int VIBRATE_LENGTH_COMPLETE = 200;
+
+    // Length of the flash, in milliseconds
+    private static int FLASH_LENGTH = 50;
+
+    //Max possible notes per measure
+    private static int MAX_NOTES = 16;
 
     // Current beats per minute value
     private int mCurrentTempo;
@@ -36,7 +44,6 @@ public class WearMainActivity extends Activity {
 
     // NOTE: Currently we only support quarter notes per measure
     private int mNotesPerMeasure = 4;
-
     private int mCurrentNote = 1;
 
     private Vibrator mVibrator;
@@ -48,9 +55,6 @@ public class WearMainActivity extends Activity {
     private Object mParamLock = new Object();
 
     private Animation mFlashAnimation;
-
-    // Length of the flash, in milliseconds
-    private static int FLASH_LENGTH = 50;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +86,25 @@ public class WearMainActivity extends Activity {
             Log.e(TAG, "mRelLayout returned NULL!");
         }
 
+        // Get pointers to all the buttons so we don't need to do it again
         mStartButton = (Button)findViewById(R.id.startButton);
+        mTimeSigNumView = (TextView)findViewById(R.id.timeSigNum);
+        mTimeSigDenView = (TextView)findViewById(R.id.timeSigDen);
+    }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e(TAG, "onPause()");
+        synchronized (mParamLock) {
+            // Stop any pending timers
+            if (mCurrentlyRunning == true) {
+                mStartButton.setText("Stop");
+                mPeriodicHandler.removeCallbacks(mBeatsTask);
+                mCurrentlyRunning = false;
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
+        }
     }
 
     public void handleTempoClick(View v) {
@@ -143,18 +164,12 @@ public class WearMainActivity extends Activity {
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.e(TAG, "onPause()");
+    public void timeSigNumClick(View v) {
         synchronized (mParamLock) {
-            // Stop any pending timers
-            if (mCurrentlyRunning == true) {
-                mStartButton.setText("Stop");
-                mPeriodicHandler.removeCallbacks(mBeatsTask);
-                mCurrentlyRunning = false;
-                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            }
+            Log.e(TAG, "YAY GOT CLICKED! prev Nr was :" + mNotesPerMeasure);
+            mNotesPerMeasure = mNotesPerMeasure % 16;
+            mNotesPerMeasure++;
         }
+        mTimeSigNumView.setText("" + mNotesPerMeasure);
     }
 }
