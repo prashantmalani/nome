@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
+import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
@@ -36,7 +37,7 @@ public class WearMainActivity extends Activity {
     // NOTE: Currently we only support quarter notes per measure
     private int mNotesPerMeasure = 4;
 
-    private int mCurrentNote = 0;
+    private int mCurrentNote = 1;
 
     private Vibrator mVibrator;
 
@@ -128,14 +129,17 @@ public class WearMainActivity extends Activity {
         Button startButton = (Button)findViewById(R.id.startButton);
         synchronized (mParamLock) {
             if (mCurrentlyRunning == false) {
+                getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
                 mCurrentlyRunning = true;
                 mBeatsTask.run();
                 startButton.setText("Stop");
-                mCurrentNote = 0;
+                // Reset to one
+                mCurrentNote = 1;
             } else {
                 startButton.setText("Start");
                 mPeriodicHandler.removeCallbacks(mBeatsTask);
                 mCurrentlyRunning = false;
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             }
         }
     }
@@ -150,6 +154,7 @@ public class WearMainActivity extends Activity {
                 mStartButton.setText("Stop");
                 mPeriodicHandler.removeCallbacks(mBeatsTask);
                 mCurrentlyRunning = false;
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
             }
         }
     }
