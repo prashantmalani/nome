@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
-import android.view.animation.AccelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.RelativeLayout;
@@ -49,7 +49,7 @@ public class WearMainActivity extends Activity {
     private Animation mFlashAnimation;
 
     // Length of the flash, in milliseconds
-    private static int FLASH_LENGTH = 10;
+    private static int FLASH_LENGTH = 50;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +72,7 @@ public class WearMainActivity extends Activity {
         // Perform Animation setup
         mFlashAnimation = new AlphaAnimation(0, 1);
         mFlashAnimation.setDuration(FLASH_LENGTH * 5);
-        mFlashAnimation.setInterpolator(new AccelerateInterpolator());
+        mFlashAnimation.setInterpolator(new LinearInterpolator());
         mFlashAnimation.setRepeatMode(Animation.REVERSE);
 
         setContentView(R.layout.rect_activity_wear_main);
@@ -89,10 +89,12 @@ public class WearMainActivity extends Activity {
         synchronized (mParamLock) {
             switch (v.getId()) {
                 case R.id.temp_decrease_button:
-                    mCurrentTempo--;
+                    if (mCurrentTempo > 20)
+                        mCurrentTempo--;
                     break;
                 case R.id.tempo_increase_button:
-                    mCurrentTempo++;
+                    if (mCurrentTempo < 190)
+                        mCurrentTempo++;
                 default:
                     break;
             }
@@ -112,7 +114,8 @@ public class WearMainActivity extends Activity {
                 if (mCurrentNote == 0) {
                     //End of Bar, so vibrate longer
                     mVibrator.vibrate(VIBRATE_LENGTH_COMPLETE);
-                    //mRelLayout.startAnimation(mFlashAnimation);
+                    mRelLayout.startAnimation(mFlashAnimation);
+                    mFlashAnimation.start();
                 } else {
                     mVibrator.vibrate(VIBRATE_LENGTH_NORMAL);
                 }
@@ -128,6 +131,7 @@ public class WearMainActivity extends Activity {
                 mCurrentlyRunning = true;
                 mBeatsTask.run();
                 startButton.setText("Stop");
+                mCurrentNote = 0;
             } else {
                 startButton.setText("Start");
                 mPeriodicHandler.removeCallbacks(mBeatsTask);
