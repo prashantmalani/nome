@@ -116,7 +116,6 @@ public class WearMainActivity extends Activity {
                     //End of Bar, so vibrate longer
                     mVibrator.vibrate(VIBRATE_LENGTH_COMPLETE);
                     mRelLayout.startAnimation(mFlashAnimation);
-                    mFlashAnimation.start();
                 } else {
                     mVibrator.vibrate(VIBRATE_LENGTH_NORMAL);
                 }
