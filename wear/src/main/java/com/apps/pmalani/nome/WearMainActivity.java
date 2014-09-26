@@ -20,11 +20,12 @@ public class WearMainActivity extends Activity {
     private static final String TAG = "NomeWearMainActivity";
     private TextView mTextView;
     private RelativeLayout mRelLayout;
+    private Button mStartButton;
 
     private static int MILLISECONDS_PER_MIN = 60 * 1000;
 
-    private static int VIBRATE_LENGTH_NORMAL = 5;
-    private static int VIBRATE_LENGTH_COMPLETE = 20;
+    private static int VIBRATE_LENGTH_NORMAL = 50;
+    private static int VIBRATE_LENGTH_COMPLETE = 100;
 
     // Current beats per minute value
     private int mCurrentTempo;
@@ -80,6 +81,8 @@ public class WearMainActivity extends Activity {
             Log.e(TAG, "mRelLayout returned NULL!");
         }
 
+        mStartButton = (Button)findViewById(R.id.startButton);
+
     }
 
     public void handleTempoClick(View v) {
@@ -108,12 +111,11 @@ public class WearMainActivity extends Activity {
                 mCurrentNote = (mCurrentNote + 1) % mNotesPerMeasure;
                 if (mCurrentNote == 0) {
                     //End of Bar, so vibrate longer
-                    mVibrator.vibrate(VIBRATE_LENGTH_NORMAL);
+                    mVibrator.vibrate(VIBRATE_LENGTH_COMPLETE);
                     //mRelLayout.startAnimation(mFlashAnimation);
                 } else {
                     mVibrator.vibrate(VIBRATE_LENGTH_NORMAL);
                 }
-                mVibrator.vibrate(VIBRATE_LENGTH_NORMAL);
                 mPeriodicHandler.postDelayed(this, mTimeInterval);
             }
         }
@@ -141,6 +143,7 @@ public class WearMainActivity extends Activity {
         synchronized (mParamLock) {
             // Stop any pending timers
             if (mCurrentlyRunning == true) {
+                mStartButton.setText("Stop");
                 mPeriodicHandler.removeCallbacks(mBeatsTask);
                 mCurrentlyRunning = false;
             }
