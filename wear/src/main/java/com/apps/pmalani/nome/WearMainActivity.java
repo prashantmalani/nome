@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Vibrator;
 import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.AlphaAnimation;
@@ -56,6 +57,12 @@ public class WearMainActivity extends Activity {
 
     private Animation mFlashAnimation;
 
+    private boolean mIsSquare;
+
+    private void setIsSquare(boolean isSquare) {
+        mIsSquare = isSquare;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,22 +81,45 @@ public class WearMainActivity extends Activity {
                 mTextView = (TextView) stub.findViewById(R.id.text);
             }
         });
+
+        stub.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                Log.e(TAG, "HEY IM GETTING CALLED HERE!");
+                if (insets.isRound()) {
+                    setIsSquare(false);
+                    setContentView(R.layout.round_activity_wear_main);
+                } else {
+                    setIsSquare(true);
+                    setContentView(R.layout.rect_activity_wear_main);
+                }
+
+                // Here is a more appropriate place to get pointers to the buttons (maybe)
+                mRelLayout = (RelativeLayout)findViewById(R.id.relLayout);
+                if (mRelLayout == null) {
+                    Log.e(TAG, "mRelLayout returned NULL!");
+                }
+                mStartButton = (Button)findViewById(R.id.startButton);
+                if (mStartButton == null) {
+                    Log.e(TAG, "mStartButton returned NULL");
+                }
+                mTimeSigNumView = (TextView)findViewById(R.id.timeSigNum);
+                if (mTimeSigNumView == null) {
+                    Log.e(TAG, "mTimeSigNumView returned NULL");
+                }
+                mTimeSigDenView = (TextView)findViewById(R.id.timeSigDen);
+                if (mTimeSigDenView == null) {
+                    Log.e(TAG, "mTimeSigDenView returned NULL");
+                }
+                return insets;
+            }
+        });
+
         // Perform Animation setup
         mFlashAnimation = new AlphaAnimation(0, 1);
         mFlashAnimation.setDuration(FLASH_LENGTH * 5);
         mFlashAnimation.setInterpolator(new LinearInterpolator());
         mFlashAnimation.setRepeatMode(Animation.REVERSE);
-
-        setContentView(R.layout.rect_activity_wear_main);
-        mRelLayout = (RelativeLayout)findViewById(R.id.relLayout);
-        if (mRelLayout == null) {
-            Log.e(TAG, "mRelLayout returned NULL!");
-        }
-
-        // Get pointers to all the buttons so we don't need to do it again
-        mStartButton = (Button)findViewById(R.id.startButton);
-        mTimeSigNumView = (TextView)findViewById(R.id.timeSigNum);
-        mTimeSigDenView = (TextView)findViewById(R.id.timeSigDen);
     }
 
     @Override
@@ -166,7 +196,6 @@ public class WearMainActivity extends Activity {
 
     public void timeSigNumClick(View v) {
         synchronized (mParamLock) {
-            Log.e(TAG, "YAY GOT CLICKED! prev Nr was :" + mNotesPerMeasure);
             mNotesPerMeasure = mNotesPerMeasure % 16;
             mNotesPerMeasure++;
         }
